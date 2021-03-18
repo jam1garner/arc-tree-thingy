@@ -1,0 +1,12 @@
+[package]
+name = "arc-browser"
+version = "0.1.0"
+authors = ["jam1garner <8260240+jam1garner@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+fltk = "0.15.9"
+smash-arc = { version = "0.2.1", features = ["libzstd"] }
+
+[profile.release]
+lto = true
