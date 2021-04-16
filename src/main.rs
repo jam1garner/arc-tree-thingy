@@ -1,56 +1,13 @@
-use fltk::{app, prelude::*, frame::*, group::*, button::*, window::*, tree::{Tree, TreeItem, TreeReason, TreeSort}};
-use smash_arc::{ArcFile, FileNode, Hash40};
+use fltk::{app, prelude::*, frame::*, group::*, button::*, window::*, output::MultilineOutput, tree::{Tree, TreeReason, TreeSort}};
+use smash_arc::{ArcFile, Hash40};
 
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 use std::rc::Rc;
 
-fn build_tree(arc: &ArcFile, tree: &mut Tree, hash: impl Into<Hash40>, depth_left: usize) -> Result<(), ()> {
-    let listing = match arc.get_dir_listing(hash) {
-        Some(listing) => listing,
-        None => return Err(())
-    };
+mod tree_utils;
+mod file_info;
 
-    for node in listing {
-        match node {
-            FileNode::Dir(dir) => {
-                let path = dir.global_label();
-                if let Some(path) = path.as_deref() {
-                    tree.add(&path);
-                }
-                if depth_left > 0 {
-                    build_tree(arc, tree, dir, depth_left - 1).unwrap();
-                }
-                if let Some(path) = path {
-                    let _ = tree.close(&path, false);
-                }
-            }
-            FileNode::File(file) => {
-                if let Some(path) = file.global_label() {
-                    tree.add(&path);
-                }
-            }
-        }
-    }
-
-    Ok(())
-}
-
-fn get_path(tree_item: TreeItem) -> String {
-    if let Some(label) = tree_item.label() {
-        if let Some(parent) = tree_item.parent() {
-            let path = get_path(parent);
-            if path == "/" {
-                label
-            } else {
-                format!("{}/{}", path, label)
-            }
-        } else {
-            label
-        }
-    } else {
-        "".to_owned()
-    }
-}
+use tree_utils::{build_tree, get_path, extract_tree_item};
 
 fn main() {
     let app = app::App::default();
@@ -59,13 +16,12 @@ fn main() {
     let arc_path = "/home/jam/re/ult/900/data.arc";
     let label_path = "/home/jam/dev/ult/smash-arc/hash_labels.txt";
     Hash40::set_global_labels_file(&label_path).unwrap();
-    let arc = Box::leak(Box::new(ArcFile::open(arc_path).unwrap()));
+    let arc = &*Box::leak(Box::new(ArcFile::open(arc_path).unwrap()));
 
     let mut wind = Window::default()
         .with_size(750, 500)
         .center_screen()
         .with_label("Arc Tree Thing");
-
 
     let mut pack = Pack::default().size_of(&wind).center_of(&wind);
     pack.set_type(PackType::Horizontal);
@@ -78,6 +34,23 @@ fn main() {
     tree.set_sort_order(TreeSort::Ascending);
 
     build_tree(&arc, &mut tree, "/", 1).unwrap();
+    
+    tree_pack.add(&tree);
+
+    let mut button_pack = Pack::default().with_size(500, 25);
+
+    let mut extract_button = Button::default().with_size(50, 25).with_label("Extract");
+    button_pack.add(&extract_button);
+
+    tree_pack.add(&button_pack);
+    tree_pack.end();
+    pack.add(&tree_pack);
+
+    let mut frame = Frame::default().with_size(250, 500).right_of(&tree, 0);
+    frame.set_color(Color::Red);
+
+    let output = Arc::new(MultilineOutput::default().center_of(&frame).size_of(&frame));
+
     tree.set_callback2(move |tree| {
         match tree.callback_reason() {
             TreeReason::Opened => {
@@ -87,36 +60,29 @@ fn main() {
                     build_tree(arc, tree, &*path, 3).unwrap();
                 }
             }
+            TreeReason::Selected => {
+                let path = get_path(tree.callback_item().unwrap());
+                let output = Arc::clone(&output);
+                std::thread::spawn(move || {
+                    output.set_value(&file_info::get(arc, &path));
+                });
+            }
             _ => ()
         }
     });
-
     tree.get_items()
         .unwrap()
         .into_iter()
         .for_each(|mut node| node.close());
     tree.root().unwrap().open();
-    
-    tree_pack.add(&tree);
+
     let tree = Rc::new(Mutex::new(tree));
     let tree_ref = Rc::clone(&tree);
+    
+    extract_button.set_callback(move || {
+        extract_tree_item(arc, tree_ref.lock().unwrap().first_selected_item().unwrap())
+    });
 
-    let mut button_pack = Pack::default().with_size(500, 25);
-
-    let mut extract_button = Button::default().with_size(50, 25).with_label("Extract");
-    extract_button.set_callback(move || println!("{}", tree_ref.lock().unwrap().first_selected_item().unwrap().label().unwrap()));
-    button_pack.add(&extract_button);
-
-    tree_pack.add(&button_pack);
-    tree_pack.end();
-    pack.add(&tree_pack);
-
-    let mut frame = Frame::default().with_size(250, 500).right_of(&*tree.lock().unwrap(), 0);
-    frame.set_color(Color::Red);
-
-    let mut button = Button::default().size_of(&frame).center_of(&frame).with_label("Button1");
-
-    button.set_callback(move || println!("Button hit"));
     pack.add(&frame);
     pack.end();
 

@@ -12,19 +12,20 @@ dependencies = [
 
 [[package]]
 name = "binread"
-version = "1.4.1"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "258d2d861723c05ad02956cae4878ceddb5e05b0dc2841ca73a3479ab7a46f4d"
+checksum = "a883c66db6f3c86b19210ceed1b2b18de64b617c92cb0f0bc90b8c05f18dba87"
 dependencies = [
  "binread_derive",
 ]
 
 [[package]]
 name = "binread_derive"
-version = "1.4.3"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d63ec80ac459fd10ae68854c26ee1c5ab5ac93866dba8f8a95cabbfeaa79b284"
+checksum = "c575d9a28eb4c2d61747b23d50271c6699b941448c35a738af35267f90b3d4d2"
 dependencies = [
+ "either",
  "proc-macro2",
  "quote",
  "syn",
@@ -283,9 +284,7 @@ checksum = "fe0f37c9e8f3c5a4a66ad655a93c74daac4ad00c441533bf5c6e7990bb42604e"
 
 [[package]]
 name = "smash-arc"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4224ea5429fae888593c7cfa8f17f10321a983d7f66f7ea33c4ae7a5958c7a38"
+version = "0.3.0"
 dependencies = [
  "binread",
  "crc32fast",
