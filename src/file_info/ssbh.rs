@@ -2,6 +2,7 @@ use ssbh_lib::{Ssbh, SsbhFile};
 use binread::{BinReaderExt, io::Cursor};
 
 use ssbh_lib::formats::skel::SkelBoneEntry;
+use ssbh_lib::formats::mesh::MeshObject;
 
 // Format strings must literals, so to store multi-line ones, I'll just use raw strings
 // in a macro, it's bad, I know
@@ -23,6 +24,17 @@ Bones:
 {}
 "#
     };
+    (mesh) => {
+r#"Namco Mesh File v{}.{}
+
+Mesh name: {}
+Object count: {}
+Vertex count: {}
+
+Mesh Objects:
+{}
+"#
+    }
 }
 
 pub fn info(contents: Vec<u8>) -> String {
@@ -52,6 +64,17 @@ pub fn info(contents: Vec<u8>) -> String {
                 bone_list(&skel.bone_entries.elements),
             )
         }
+        SsbhFile::Mesh(mesh) => {
+            format!(
+                fmt_lit!(mesh),
+                mesh.major_version,
+                mesh.minor_version,
+                mesh.model_name.get_string().unwrap_or("None"),
+                mesh.objects.elements.len(),
+                vert_count(&mesh.objects.elements),
+                mesh_list(&mesh.objects.elements),
+            )
+        }
         _ => "SSBH File".to_owned()
     }
 }
@@ -61,4 +84,17 @@ fn bone_list(bones: &[SkelBoneEntry]) -> String {
         .filter_map(|bone| Some(format!("- {}", bone.name.get_string()?)))
         .collect::<Vec<String>>()
         .join("\n")
+}
+
+fn mesh_list(meshes: &[MeshObject]) -> String {
+    meshes.iter()
+        .filter_map(|mesh| Some(format!("- {}", mesh.name.get_string()?)))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn vert_count(meshes: &[MeshObject]) -> usize {
+    meshes.iter()
+        .map(|mesh| mesh.vertex_count as usize)
+        .sum()
 }
