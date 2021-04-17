@@ -19,7 +19,7 @@ fn main() {
     let arc = &*Box::leak(Box::new(ArcFile::open(arc_path).unwrap()));
 
     let mut wind = Window::default()
-        .with_size(750, 500)
+        .with_size(1000, 500)
         .center_screen()
         .with_label("Arc Tree Thing");
 
@@ -46,7 +46,7 @@ fn main() {
     tree_pack.end();
     pack.add(&tree_pack);
 
-    let mut frame = Frame::default().with_size(250, 500).right_of(&tree, 0);
+    let mut frame = Frame::default().with_size(500, 500).right_of(&tree, 0);
     frame.set_color(Color::Red);
 
     let output = Arc::new(MultilineOutput::default().center_of(&frame).size_of(&frame));
