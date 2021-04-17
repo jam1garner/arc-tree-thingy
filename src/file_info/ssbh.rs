@@ -1,8 +1,11 @@
-use ssbh_lib::{Ssbh, SsbhFile};
 use binread::{BinReaderExt, io::Cursor};
 
+use ssbh_lib::{Ssbh, SsbhFile};
 use ssbh_lib::formats::skel::SkelBoneEntry;
 use ssbh_lib::formats::mesh::MeshObject;
+use ssbh_lib::formats::matl::{MatlEntry, MatlAttribute, Param};
+
+use std::fmt::Display;
 
 // Format strings must literals, so to store multi-line ones, I'll just use raw strings
 // in a macro, it's bad, I know
@@ -32,6 +35,13 @@ Object count: {}
 Vertex count: {}
 
 Mesh Objects:
+{}
+"#
+    };
+    (matl) => {
+r#"Namco Material Parameter File v{}.{}
+
+Materials ({}):
 {}
 "#
     }
@@ -75,6 +85,15 @@ pub fn info(contents: Vec<u8>) -> String {
                 mesh_list(&mesh.objects.elements),
             )
         }
+        SsbhFile::Matl(matl) => {
+            format!(
+                fmt_lit!(matl),
+                matl.major_version,
+                matl.minor_version,
+                matl.entries.elements.len(),
+                matl_list(&matl.entries.elements),
+            )
+        }
         _ => "SSBH File".to_owned()
     }
 }
@@ -97,4 +116,54 @@ fn vert_count(meshes: &[MeshObject]) -> usize {
     meshes.iter()
         .map(|mesh| mesh.vertex_count as usize)
         .sum()
+}
+
+macro_rules! matl_fmt {
+    () => {
+r#"- {}
+    - Shader: {}
+    - Attributes:
+{}
+"#
+    };
+}
+
+fn matl_list(matls: &[MatlEntry]) -> String {
+    matls.iter()
+        .map(|matl| format!(
+            matl_fmt!(),
+            matl.material_label.get_string().unwrap_or("UnknownMaterial"),
+            matl.shader_label.get_string().unwrap_or("UnknownShader"),
+            matl_attr_list(&matl.attributes.elements),
+        ))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn matl_attr_list(attrs: &[MatlAttribute]) -> String {
+    attrs.iter()
+        .filter_map(|attr| Some(match (*attr.param.data).as_ref()? {
+            Param::Float(flt) => format!("        - {:?}: {}", attr.param_id, flt),
+            Param::Boolean(bl) => format!("        - {:?}: {}", attr.param_id, match bl {
+                0 => "false".to_string(),
+                1 => "true".to_string(),
+                val => val.to_string(),
+            }),
+            Param::Vector4(vec) => format!(
+                "        - {:?}: ({}, {}, {}, {})",
+                attr.param_id,
+                vec.x,
+                vec.y,
+                vec.z,
+                vec.w
+            ),
+            Param::MatlString(string) => format!(
+                "        - {:?}: {:?}",
+                attr.param_id,
+                string.get_string().unwrap_or("")
+            ),
+            _ => format!("        - {:?}", attr.param_id)
+        }))
+        .collect::<Vec<String>>()
+        .join("\n")
 }
