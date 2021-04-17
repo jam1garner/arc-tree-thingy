@@ -1,11 +1,11 @@
 use binread::{BinReaderExt, io::Cursor};
 
-use ssbh_lib::{Ssbh, SsbhFile};
+use ssbh_lib::{Ssbh, SsbhFile, SsbhString};
 use ssbh_lib::formats::skel::SkelBoneEntry;
 use ssbh_lib::formats::mesh::MeshObject;
 use ssbh_lib::formats::matl::{MatlEntry, MatlAttribute, Param};
-
-use std::fmt::Display;
+use ssbh_lib::formats::modl::ModlEntry;
+use ssbh_lib::formats::hlpb::{HlpbRotateAim, HlpbRotateInterpolation};
 
 // Format strings must literals, so to store multi-line ones, I'll just use raw strings
 // in a macro, it's bad, I know
@@ -44,7 +44,35 @@ r#"Namco Material Parameter File v{}.{}
 Materials ({}):
 {}
 "#
-    }
+    };
+    (modl) => {
+r#"Namco Model File v{}.{}
+
+Model: {:?}
+Skeleton File: {:?}
+Animation File: {:?}
+Mesh File: {:?}
+
+Material Files:
+{}
+
+Entries:
+{}
+"#
+    };
+    (hlpb) => {
+r#"Namco Helper Bone File v{}.{}
+
+Rotate Aim Entries: {}
+Rotate Interpolation Entries: {}
+
+Rotate Aim Entries:
+{}
+
+Rotate Interpolation Entries:
+{}
+"#
+    };
 }
 
 pub fn info(contents: Vec<u8>) -> String {
@@ -92,6 +120,33 @@ pub fn info(contents: Vec<u8>) -> String {
                 matl.minor_version,
                 matl.entries.elements.len(),
                 matl_list(&matl.entries.elements),
+            )
+        }
+        SsbhFile::Modl(modl) => {
+            format!(
+                fmt_lit!(modl),
+                modl.major_version,
+                modl.minor_version,
+                modl.model_file_name.get_string().unwrap_or("None"),
+                modl.skeleton_file_name.get_string().unwrap_or("None"),
+                modl.animation_file_name.as_ref()
+                    .map(|s| s.get_string())
+                    .flatten()
+                    .unwrap_or("None"),
+                modl.mesh_string.get_string().unwrap_or("None"),
+                str_list(&modl.material_file_names.elements),
+                modl_entry_list(&modl.entries.elements),
+            )
+        }
+        SsbhFile::Hlpb(hlpb) => {
+            format!(
+                fmt_lit!(hlpb),
+                hlpb.major_version,
+                hlpb.minor_version,
+                hlpb.aim_entries.elements.len(),
+                hlpb.interpolation_entries.elements.len(),
+                aim_list(&hlpb.aim_entries.elements),
+                interpolation_list(&hlpb.interpolation_entries.elements),
             )
         }
         _ => "SSBH File".to_owned()
@@ -164,6 +219,90 @@ fn matl_attr_list(attrs: &[MatlAttribute]) -> String {
             ),
             _ => format!("        - {:?}", attr.param_id)
         }))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn str_list(strs: &[SsbhString]) -> String {
+    strs.iter()
+        .filter_map(|string| Some(format!("    - {:?}", string.get_string()?)))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn modl_entry_list(entries: &[ModlEntry]) -> String {
+    entries.iter()
+        .map(|entry| format!(
+            "    - {}[{}]: {:?}",
+            entry.mesh_name.get_string().unwrap_or("None"),
+            entry.sub_index,
+            entry.material_label.get_string().unwrap_or("UnknownMaterial"),
+        ))
+        .collect::<Vec<String>>()
+        .join("\n")
+
+}
+
+macro_rules! aim_fmt {
+    () => {
+r#"- {}
+    - AimBone[0]: {:?}
+    - AimBone[1]: {:?}
+    - AimType[0]: {:?}
+    - AimType[1]: {:?}
+    - TargetBone[0]: {:?}
+    - TargetBone[1]: {:?}
+"#
+    };
+}
+
+macro_rules! ssbh_str {
+    ($expr:expr) => {
+        $expr.get_string().unwrap_or("None")
+    };
+}
+
+fn aim_list(entries: &[HlpbRotateAim]) -> String {
+    entries.iter()
+        .map(|aim| format!(
+            aim_fmt!(),
+            ssbh_str!(aim.name),
+            ssbh_str!(aim.aim_bone_name1),
+            ssbh_str!(aim.aim_bone_name2),
+            ssbh_str!(aim.aim_type1),
+            ssbh_str!(aim.aim_type2),
+            ssbh_str!(aim.target_bone_name1),
+            ssbh_str!(aim.target_bone_name2),
+        ))
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+macro_rules! interp_fmt {
+    () => {
+r#"- {}
+    - Bone: {:?}
+    - Root Bone: {:?}
+    - Parent Bone: {:?}
+    - Driver Bone: {:?}
+    - Minimum Range: ({}, {}, {})
+    - Maximum Range: ({}, {}, {})
+"#
+    };
+}
+
+fn interpolation_list(entries: &[HlpbRotateInterpolation]) -> String {
+    entries.iter()
+        .map(|interp| format!(
+            interp_fmt!(),
+            ssbh_str!(interp.name),
+            ssbh_str!(interp.bone_name),
+            ssbh_str!(interp.root_bone_name),
+            ssbh_str!(interp.parent_bone_name),
+            ssbh_str!(interp.driver_bone_name),
+            interp.range_min.x, interp.range_min.y, interp.range_min.z,
+            interp.range_max.x, interp.range_max.y, interp.range_max.z,
+        ))
         .collect::<Vec<String>>()
         .join("\n")
 }
