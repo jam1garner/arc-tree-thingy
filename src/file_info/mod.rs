@@ -3,6 +3,7 @@ use std::path::Path;
 
 mod nutexb;
 mod ssbh;
+mod prc;
 
 pub fn get(arc: &ArcFile, path: &str) -> String {
     let extension = Path::new(path)
@@ -23,6 +24,7 @@ pub fn get(arc: &ArcFile, path: &str) -> String {
             "nutexb" => nutexb::info(get_contents!()),
             "nuhlpb" | "numatb" | "numdlb" | "nusrcmdlb" | "numshb" | "nusktb" | "nuanmb"
             | "nurpdb" | "nufxlb" | "nushdb" => ssbh::info(get_contents!()),
+            "prc" | "stdat" | "stprm" => prc::info(get_contents!()),
             _ => format!("No info"),
         }
     } else {

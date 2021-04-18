@@ -10,6 +10,12 @@ mod file_info;
 use tree_utils::{build_tree, get_path, extract_tree_item};
 
 fn main() {
+    prc::hash40::set_custom_labels(
+        prc::hash40::read_custom_labels("/home/jam/dev/ult/param-labels/ParamLabels.csv")
+            .unwrap()
+            .into_iter()
+    );
+    
     let app = app::App::default();
     //let arc_path = fltk::dialog::file_chooser("Open data.arc", "*.arc", ".", false).unwrap();
     //let label_path = fltk::dialog::file_chooser("Open Labels", "*", ".", false).unwrap();
