@@ -26,6 +26,6 @@ pub fn get(arc: &ArcFile, path: &str) -> String {
             _ => format!("No info"),
         }
     } else {
-        format!("No info")
+        format!("Folder")
     }
 }

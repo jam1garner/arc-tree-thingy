@@ -527,6 +527,7 @@ dependencies = [
 [[package]]
 name = "nutexb"
 version = "0.0.2"
+source = "git+https://github.com/jam1garner/nutexb#f4748a1e0b6f01db9844ba1130bb0356ac20f80b"
 dependencies = [
  "binread 1.4.1",
  "binwrite",
@@ -707,6 +708,7 @@ checksum = "fe0f37c9e8f3c5a4a66ad655a93c74daac4ad00c441533bf5c6e7990bb42604e"
 [[package]]
 name = "smash-arc"
 version = "0.3.0"
+source = "git+https://github.com/jam1garner/smash-arc#12e73c8a34776cca6d45eff9ab6a4828398865c8"
 dependencies = [
  "binread 2.1.1",
  "crc32fast",
