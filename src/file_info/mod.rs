@@ -1,6 +1,7 @@
 use smash_arc::{ArcFile, ArcLookup};
 use std::path::Path;
 
+mod nus3audio;
 mod nutexb;
 mod ssbh;
 mod prc;
@@ -25,6 +26,7 @@ pub fn get(arc: &ArcFile, path: &str) -> String {
             "nuhlpb" | "numatb" | "numdlb" | "nusrcmdlb" | "numshb" | "nusktb" | "nuanmb"
             | "nurpdb" | "nufxlb" | "nushdb" => ssbh::info(get_contents!()),
             "prc" | "stdat" | "stprm" => prc::info(get_contents!()),
+            "nus3audio" => nus3audio::info(get_contents!()),
             _ => format!("No info"),
         }
     } else {
