@@ -14,6 +14,8 @@ prc-rs = "1.3.2"
 nus3audio = "1.1.0"
 humansize = "1.1.0"
 smash-sli = { git = "https://github.com/jam1garner/smash-sli" }
+smash-csb = { git = "https://github.com/jam1garner/smash-csb", features = ["derive_serde"] }
+serde_yaml = "0.8.17"
 
 [profile.release]
 lto = true
