@@ -5,6 +5,7 @@ mod nus3audio;
 mod nutexb;
 mod ssbh;
 mod prc;
+mod sli;
 
 pub fn get(arc: &ArcFile, path: &str) -> String {
     let extension = Path::new(path)
@@ -27,6 +28,7 @@ pub fn get(arc: &ArcFile, path: &str) -> String {
             | "nurpdb" | "nufxlb" | "nushdb" => ssbh::info(get_contents!()),
             "prc" | "stdat" | "stprm" => prc::info(get_contents!()),
             "nus3audio" => nus3audio::info(get_contents!()),
+            "sli" => sli::info(get_contents!()),
             _ => format!("No info"),
         }
     } else {

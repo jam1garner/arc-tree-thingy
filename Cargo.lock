@@ -24,8 +24,8 @@ dependencies = [
  "nus3audio",
  "nutexb",
  "prc-rs",
- "serde_yaml",
  "smash-arc",
+ "smash-sli",
  "ssbh_lib",
 ]
 
@@ -91,8 +91,18 @@ version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39fa2775a25ce36833cc043fb21c028a939b9e0e38fd391215d48b6d4f37e806"
 dependencies = [
- "binwrite_derive",
+ "binwrite_derive 0.1.2",
  "byteorder",
+ "paste",
+]
+
+[[package]]
+name = "binwrite"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42c3da1db1f384ad643e27cb6ba4f08f2a7cd8753bef8dd95c39fe45d7a474c8"
+dependencies = [
+ "binwrite_derive 0.2.1",
  "paste",
 ]
 
@@ -101,6 +111,17 @@ name = "binwrite_derive"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a58e03329b743c50a1d69ceed60d4acf6a12833f3476f414fbbebaf7e6d98b5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "binwrite_derive"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "476f17c19ce04226ba997c229ce8fb96eaef1c0e0745ec91d8df35f723aae353"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -293,12 +314,6 @@ dependencies = [
  "quote",
  "syn",
 ]
-
-[[package]]
-name = "dtoa"
-version = "0.4.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56899898ce76aaf4a0f24d914c97ea6ed976d42fec6ad33fcbb0a1103e07b2b0"
 
 [[package]]
 name = "either"
@@ -500,12 +515,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "538c092e5586f4cdd7dd8078c4a79220e3e168880218124dcbce860f0ea938c6"
 
 [[package]]
-name = "linked-hash-map"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
-
-[[package]]
 name = "lock_api"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -681,7 +690,7 @@ version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c20b3601625977b15a1cd437f65bdd3540920cc7daeaf9726d1f6baf3846407c"
 dependencies = [
- "binwrite",
+ "binwrite 0.1.5",
  "crc",
  "itertools 0.8.2",
  "nom",
@@ -694,7 +703,7 @@ version = "0.0.2"
 source = "git+https://github.com/jam1garner/nutexb#f4748a1e0b6f01db9844ba1130bb0356ac20f80b"
 dependencies = [
  "binread 1.4.1",
- "binwrite",
+ "binwrite 0.1.5",
  "ddsfile",
  "image",
 ]
@@ -876,18 +885,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_yaml"
-version = "0.8.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15654ed4ab61726bf918a39cb8d98a2e2995b002387807fa6ba58fdf7f59bb23"
-dependencies = [
- "dtoa",
- "linked-hash-map",
- "serde",
- "yaml-rust",
-]
-
-[[package]]
 name = "smallvec"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -906,6 +903,15 @@ dependencies = [
  "parking_lot",
  "thiserror",
  "zstd",
+]
+
+[[package]]
+name = "smash-sli"
+version = "0.8.0"
+source = "git+https://github.com/jam1garner/smash-sli#161c1490eec5c05ab4a78b052358da30542f9224"
+dependencies = [
+ "binread 1.4.1",
+ "binwrite 0.2.1",
 ]
 
 [[package]]
@@ -1019,15 +1025,6 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
-
-[[package]]
-name = "yaml-rust"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56c1936c4cc7a1c9ab21a1ebb602eb942ba868cbd44a99cb7cdc5892335e1c85"
-dependencies = [
- "linked-hash-map",
-]
 
 [[package]]
 name = "zstd"
