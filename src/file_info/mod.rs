@@ -7,6 +7,7 @@ mod ssbh;
 mod prc;
 mod sli;
 mod csb;
+mod sqb;
 
 pub fn get(arc: &ArcFile, path: &str) -> String {
     let extension = Path::new(path)
@@ -31,6 +32,7 @@ pub fn get(arc: &ArcFile, path: &str) -> String {
             "nus3audio" => nus3audio::info(get_contents!()),
             "sli" => sli::info(get_contents!()),
             "csb" => csb::info(get_contents!()),
+            "sqb" => sqb::info(get_contents!()),
             _ => format!("No info"),
         }
     } else {
