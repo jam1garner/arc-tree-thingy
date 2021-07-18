@@ -17,10 +17,10 @@ fn main() {
     );
     
     let app = app::App::default();
-    //let arc_path = fltk::dialog::file_chooser("Open data.arc", "*.arc", ".", false).unwrap();
-    //let label_path = fltk::dialog::file_chooser("Open Labels", "*", ".", false).unwrap();
-    let arc_path = "/home/jam/re/ult/900/data.arc";
-    let label_path = "/home/jam/dev/ult/smash-arc/hash_labels.txt";
+    let arc_path = fltk::dialog::file_chooser("Open data.arc", "*.arc", ".", false).unwrap();
+    let label_path = fltk::dialog::file_chooser("Open Labels", "*", ".", false).unwrap();
+    //let arc_path = "/home/jam/re/ult/900/data.arc";
+    //let label_path = "/home/jam/dev/ult/smash-arc/hash_labels.txt";
     Hash40::set_global_labels_file(&label_path).unwrap();
     let arc = &*Box::leak(Box::new(ArcFile::open(arc_path).unwrap()));
 
