@@ -10,8 +10,9 @@ mod file_info;
 use tree_utils::{build_tree, get_path, extract_tree_item};
 
 fn main() {
+    let param_label_path = fltk::dialog::file_chooser("Open ParamLabels.csv", "*.csv", ".", false).unwrap();
     prc::hash40::set_custom_labels(
-        prc::hash40::read_custom_labels("/home/jam/dev/ult/param-labels/ParamLabels.csv")
+        prc::hash40::read_custom_labels(param_label_path)
             .unwrap()
             .into_iter()
     );
